@@ -46,8 +46,12 @@ def upload_file():
             return jsonify({"response":0})
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            result = predic(f'./uploaded_files/{filename}')
+            buffer_file = BytesIO()
+            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(buffer_file)
+            #result = predic(f'./uploaded_files/{filename}')
+            buffer_file.seek(0)
+            result = predic(buffer_file)
             print(type(result))
             #return redirect(url_for('download_file', name=filename))
             return send_file(result,download_name='prediction.csv',mimetype='text/csv')#jsonify({"response":1})
@@ -56,7 +60,7 @@ def predic(csv):
     if csv != None:
         df = pd.read_csv(csv)
         result = df.copy()
-        sc = StandardScaler()
+        #sc = StandardScaler()
         if all(item in df.columns for item in CSV_COLUMNS):
             df.drop(columns=['RowNumber','CustomerId','Surname'],inplace=True)
             df = pd.get_dummies(df,columns=['Geography','Gender'])
