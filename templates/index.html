@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    </link>
+
+</head>
+
+<body>
+    <div class="d-flex flex-column container-fluid vh-100">
+        {% include 'header.html' %}
+        <div class="card mt-5">
+            <h5 class="card-header">Requisitos del archivo !</h5>
+            <div class="card-body">
+                <p class="card-title">los siguientes campos deben estar presentes en el orden mencionado en un archivo delimitado por comas en
+                    formato (.csv)</p>
+                <p class="card-text">
+                    <b>1. RowNumber</b> — Corresponde al numero del registro.<br>
+                    <b>2. CustomerId</b> — Contiene valores aleatorios de los clientes que se tomaron para el analisis.<br>
+                    <b>3. Surname</b> — Apellido del cliente.<br>
+                    <b>4. CreditScore</b> — Puntaje calculado por el banco el cual podria tener impacto en el abandono de
+                    clientes.<br>
+                    <b>5. Geography</b> — Es el sitio de residencia del cliente.<br>
+                    <b>6. Gender</b> - Corresponde al genero de la persona.<br>
+                    <b>7. Age</b> — Edad del cliente.<br>
+                    <b>8. Tenure</b> — Hace referencia al numero de años que permanece como cliente del banco,<br>
+                    <b>9. Balance</b> — Indicador calculado por el banco que puede afectar el abandono del cliente, en
+                    terminos generales un cliente con alto balance, es menos propenso a salir de la entidad
+                    bancaria.<br>
+                    <b>10. NumOfProducts</b> — Es el numero de productos que el cliente a adquirido con el banco.<br>
+                    <b>11. HasCrCard</b> — Muestra si el cliente posee tarjetas de credito con la entidad bancaria.<br>
+                    <b>12. IsActiveMember</b> — Define si un cliente es activo o no.<br>
+                    <b>13. EstimatedSalary</b> — Indicador calculado por el banco, para obtener el salario estimado.<br>
+                </p>
+
+            </div>
+        </div>
+
+        <div class="alert alert-primary my-5">
+
+            <form method="post" , action="" , enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="exampleFormControlFile1"><b>Cargar archivo .csv</b></label>
+                    <input name="file" type="file" class="form-control-file" id="file">
+                </div>
+
+            </form>
+            <button id="but_upload" type="button" class="btn btn-light">Predecir...</button>
+            <div id="download_div"></div>
+        </div>
+
+
+        {% include 'footer.html' %}
+    </div>
+
+</body>
+<script src="{{url_for('static', filename='js/bootstrap.js')}}"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.6.0.min.js"></script>
+<script>
+    
+    $(document).ready(function () {
+        
+        $("#but_upload").click(function () {
+            var fd = new FormData();
+            var files = $('#file')[0].files[0];
+            fd.append('file', files);
+
+            $.ajax({
+                url: '/upload_file',
+                type: 'post',
+                data: fd,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response['response'] != 0) {
+                        alert('file uploaded');
+                        var result_file = new Blob ([response], {
+                            type: "text/csv"
+                        });
+                        var url = window.URL || window.webkitURL;
+                        link = url.createObjectURL(result_file);
+                        var a = $("<a>Descargar predicciones</a>");
+                        a.attr("download","predictions.csv");
+                        a.attr("href", link);
+                        $("#download_div").html(a);
+                        //Auto-click to download
+                        a[0].click();
+                        //$("#download_div").html("");
+                        
+
+                    } else {
+                        alert('file not uploaded');
+                    }
+                },
+            });
+        });
+    });
+</script>
+
+</html>
